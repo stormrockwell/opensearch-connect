@@ -21,7 +21,7 @@ class Client_Bridge {
 	 *
 	 * @var self
 	 */
-	protected static $_instance;
+	protected static $instance;
 
 	/**
 	 * Constructor
@@ -40,7 +40,7 @@ class Client_Bridge {
 	 */
 	public static function get_instance( ...$args ) {
 		if ( is_null( self::$_instance ) ) {
-			static::$_instance = new static( ...$args );
+			static::$instance = new static( ...$args );
 		}
 
 		return static::$_instance;

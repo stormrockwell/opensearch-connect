@@ -68,6 +68,11 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		$this->assertTrue( $output );
 	}
 
+	/**
+	 * Provide document dataProvider.
+	 *
+	 * @return array
+	 */
 	public function provide_document() {
 		return array(
 			array(
