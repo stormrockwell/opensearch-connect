@@ -14,6 +14,14 @@ Plugin designed to connect your WordPress instance with OpenSearch.
 2. PHPUnit
 3. PHPCS & PHPCBF
 
+If you are using VSCode, I'd suggest installing the following extensions to fully take advantage of the tools.
+
+```
+PHP Debug
+PHP Sniffer & Beautifier
+Run on Save
+```
+
 ## Setup 
 
 ```

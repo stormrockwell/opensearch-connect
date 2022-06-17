@@ -123,11 +123,33 @@ class Client_Bridge {
 	/**
 	 * Index OpenSearch document
 	 *
-	 * @param array $document OpenSearch document.
+	 * @param string $id      Unique identifier for document.
+	 * @param array  $document OpenSearch document.
 	 * @return boolean
 	 */
-	public function index_document( $document ) {
-		return true; // TODO: actually work. $document should also be a class of Document.
+	public function index_document( string $id, array $document ) {
+		return $this->os_client->create(
+			array(
+				'index' => $this->index_name,
+				'id'    => $id,
+				'body'  => $document,
+			)
+		);
+	}
+
+	/**
+	 * Delete OpenSearch document
+	 *
+	 * @param string $id      Unique identifier for document.
+	 * @return boolean
+	 */
+	public function delete_document( string $id ) {
+		return $this->os_client->delete(
+			array(
+				'index' => $this->index_name,
+				'id'    => $id,
+			)
+		);
 	}
 
 }

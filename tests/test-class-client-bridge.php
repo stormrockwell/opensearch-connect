@@ -21,6 +21,11 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->client_bridge = Client_Bridge::get_instance();
+
+		/* Create index if doesn't exist */
+		if ( ! $this->client_bridge->index_exists() ) {
+			$this->client_bridge->create_index();
+		}
 	}
 
 	/**
@@ -57,19 +62,6 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test Index Document
-	 *
-	 * @dataProvider provide_document
-	 *
-	 * @param array $document OpenSearch document.
-	 * @return void
-	 */
-	public function test_index_document( $document ) {
-		$output = $this->client_bridge->index_document( $document );
-		$this->assertTrue( $output );
-	}
-
-	/**
 	 * Test index exists.
 	 *
 	 * @return void
@@ -100,6 +92,39 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test Index Document
+	 *
+	 * @dataProvider provide_document
+	 *
+	 * @param string $id       OpenSearch document index.
+	 * @param array  $document OpenSearch document.
+	 * @return void
+	 */
+	public function test_index_document( $id, $document ) {
+		$output = $this->client_bridge->index_document( $id, $document );
+		$this->assertEquals( 'created', $output['result'], 'Expected a result of "created"' );
+	}
+
+
+	/**
+	 * Test Delete Document
+	 *
+	 * @dataProvider provide_document
+	 *
+	 * @param string $id       OpenSearch document index.
+	 * @param array  $document OpenSearch document.
+	 * @return void
+	 */
+	public function test_delete_document( $id, $document ) {
+		/* Create document so we can test deleting it. */
+		$this->client_bridge->index_document( $id, $document );
+
+		$output = $this->client_bridge->delete_document( $id );
+		$terew  = $output;
+		$this->assertEquals( 'deleted', $output['result'], 'Expected a result of "deleted"' );
+	}
+
+	/**
 	 * Provide document dataProvider.
 	 *
 	 * @return array
@@ -107,9 +132,13 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	public function provide_document() {
 		return array(
 			array(
-				'id'       => 1,
-				'doc_type' => 'post',
-				'title'    => 'Hello World',
+				'1',
+				array(
+					'id'       => 1,
+					'site_id'  => 0,
+					'doc_type' => 'post',
+					'title'    => 'Hello World',
+				),
 			),
 		);
 	}

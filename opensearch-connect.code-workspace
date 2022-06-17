@@ -10,6 +10,15 @@
 	"settings": {
 		"[php]": {
 			"editor.formatOnSave": true,
+		},
+		"emeraldwalk.runonsave": {
+			"autoClearConsole": true,
+			"commands": [
+				{
+					"match": "\\.php$",
+					"cmd": "docker-compose exec wp cr phpunit"
+				}
+			]
 		}
 	}
 }

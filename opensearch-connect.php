@@ -6,7 +6,7 @@
  * Version: 0.1
  * Author: Storm Rockwell
  * Author URI: https://www.stormrockwell.com
- * License: GPL2
+ * License: GPL3
  *
  * @package Opensearch_Connect
  */
