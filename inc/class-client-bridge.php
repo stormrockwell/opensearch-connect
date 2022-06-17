@@ -39,11 +39,11 @@ class Client_Bridge {
 	 * @param mixed ...$args Args assigned to instance in constructor.
 	 */
 	public static function get_instance( ...$args ) {
-		if ( is_null( self::$_instance ) ) {
+		if ( is_null( self::$instance ) ) {
 			static::$instance = new static( ...$args );
 		}
 
-		return static::$_instance;
+		return static::$instance;
 	}
 
 	/**
@@ -60,7 +60,14 @@ class Client_Bridge {
 			->build();
 	}
 
+	/**
+	 * Index OpenSearch document
+	 *
+	 * @param array $document OpenSearch document.
+	 * @return boolean
+	 */
 	public function index_document( $document ) {
+		return true; // TODO: actually work. $document should also be a class of Document.
 	}
 
 }
