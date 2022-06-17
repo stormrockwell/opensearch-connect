@@ -2,7 +2,6 @@
     "scripts": {
         "phpcs": "phpcs",
         "phpunit": "phpunit",
-        "phpunit-debug": "phpunit --debug",
         "test": [
             "phpunit",
             "phpcs"

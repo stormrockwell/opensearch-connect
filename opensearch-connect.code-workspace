@@ -8,7 +8,8 @@
 		}
 	],
 	"settings": {
-		"phpSniffer.autoDetect": true,
-		"vscode-php-cs-fixer.fixOnSave": true
+		"[php]": {
+			"editor.formatOnSave": true,
+		}
 	}
 }

@@ -31,11 +31,12 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	public function tearDown() : void {
 		parent::tearDown();
 
+		$this->client_bridge->delete_index();
 		unset( $this->client_bridge );
 	}
 
 	/**
-	 * Test Get ES Client
+	 * Test Get ES Client to ensure it connected.
 	 *
 	 * @return void
 	 */
@@ -52,7 +53,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 
 		$output = $reflection_property->invokeArgs( $client_bridge, array( $input ) );
 
-		$this->assertIsTrue( $output->ping() );
+		$this->assertTrue( $output->ping() );
 	}
 
 	/**
@@ -66,6 +67,36 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	public function test_index_document( $document ) {
 		$output = $this->client_bridge->index_document( $document );
 		$this->assertTrue( $output );
+	}
+
+	/**
+	 * Test index exists.
+	 *
+	 * @return void
+	 */
+	public function test_index_exists() {
+		$output = $this->client_bridge->index_exists();
+		$this->assertIsBool( $output );
+	}
+
+	/**
+	 * Test Create index
+	 *
+	 * @return void
+	 */
+	public function test_create_index() {
+		$output = $this->client_bridge->create_index();
+		$this->assertTrue( $output['acknowledged'] );
+	}
+
+	/**
+	 * Test Create index
+	 *
+	 * @return void
+	 */
+	public function test_delete_index() {
+		$output = $this->client_bridge->delete_index();
+		$this->assertTrue( $output['acknowledged'] );
 	}
 
 	/**

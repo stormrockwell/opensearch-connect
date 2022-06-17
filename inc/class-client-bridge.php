@@ -24,13 +24,27 @@ class Client_Bridge {
 	protected static $instance;
 
 	/**
+	 * Index Name
+	 *
+	 * @var string
+	 */
+	public $index_name;
+
+	/**
 	 * Constructor
 	 */
 	protected function __construct() {
-		// TODO: create fields for hosts.
+		// TODO: create fields for hosts, index name, and credentials.
+		$this->index_name = 'opensearch-connect';
+
 		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
 
 		$this->os_client = $this->get_os_client( $hosts );
+
+		/* Create index if doesn't exist */
+		if ( ! $this->index_exists() ) {
+			$this->create_index();
+		}
 	}
 
 	/**
@@ -58,6 +72,52 @@ class Client_Bridge {
 			->setBasicAuthentication( 'admin', 'admin' ) // TODO: add credentials to backend and define option.
 			->setSSLVerification( false ) // TODO: add field for SSL verify.
 			->build();
+	}
+
+	/**
+	 * Check if index exists
+	 *
+	 * @return boolean
+	 */
+	public function index_exists() : bool {
+		return $this->os_client->indices()->exists(
+			array(
+				'index' => $this->index_name,
+			)
+		);
+	}
+
+	/**
+	 * Create OpenSearch index.
+	 *
+	 * @param array $body        Body usually containing additional settings/mappings.
+	 * @return array
+	 */
+	public function create_index( array $body = array() ) : array {
+
+		/* Delete index if it exists */
+		$this->delete_index( $this->index_name );
+
+		return $this->os_client->indices()->create(
+			array(
+				'index' => $this->index_name,
+				'body'  => $body,
+			)
+		);
+	}
+
+	/**
+	 * Delete index if exists
+	 *
+	 * @return array
+	 */
+	public function delete_index() : array {
+		return $this->os_client->indices()->delete(
+			array(
+				'index'              => $this->index_name,
+				'ignore_unavailable' => true,
+			)
+		);
 	}
 
 	/**
