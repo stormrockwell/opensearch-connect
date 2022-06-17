@@ -4,8 +4,11 @@
 			"path": "."
 		},
 		{
-			"path": "../../../../../"
+			"path": "../../../Downloads/Ex_Files_TestDev_PHP"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"phpSniffer.autoDetect": true,
+		"vscode-php-cs-fixer.fixOnSave": true
+	}
 }

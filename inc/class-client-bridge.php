@@ -2,14 +2,12 @@
 /**
  * Class client bridge
  *
- * @package Elastic Connect
+ * @package Opensearch_Connect
  */
 
 declare( strict_types = 1 );
 
-namespace Opensearch_Connect;
-
-use Elastic\Elasticsearch\ClientBuilder;
+namespace OSC;
 
 /**
  * Class Client Bridge
@@ -37,6 +35,8 @@ class Client_Bridge {
 
 	/**
 	 * Get Instance.
+	 *
+	 * @param mixed ...$args Args assigned to instance in constructor.
 	 */
 	public static function get_instance( ...$args ) {
 		if ( is_null( self::$_instance ) ) {
@@ -49,12 +49,16 @@ class Client_Bridge {
 	/**
 	 * Get ElasticSearch CLient
 	 *
-	 * @param array $hosts
+	 * @param array $hosts Elasticsearch instances.
 	 * @return object
 	 */
 	protected function get_es_client( $hosts ) {
-		return ClientBuilder::create()
+		print_r( 'hi' );
+		
+		return ( new \OpenSearch\ClientBuilder() )
 			->setHosts( $hosts )
+			->setBasicAuthentication( 'admin', 'admin' ) // TODO: add credentials to backend and define option.
+			->setSSLVerification( false ) // TODO: add field for SSL verify.
 			->build();
 	}
 

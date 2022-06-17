@@ -21,8 +21,8 @@ You can now access the WordPress instance at https://localhost:8080, OpenSearch 
 Install scripts for PHPUnit `docker-compose exec wp install-wp-tests`
 
 ```
-docker-compose exec wp composer test # runs PHPUnit and PHPCS
-docker-compose exec wp composer phpunit
-docker-compose exec wp composer phpcs
-docker-compose exec wp composer fix
+docker-compose exec wp cr test # runs PHPUnit and PHPCS
+docker-compose exec wp cr phpunit
+docker-compose exec wp cr phpcs
+docker-compose exec wp cr fix # Runs PHPCBF
 ```
