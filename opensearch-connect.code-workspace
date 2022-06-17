@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../Downloads/Ex_Files_TestDev_PHP"
+		}
+	],
+	"settings": {
+		"phpSniffer.autoDetect": true,
+		"vscode-php-cs-fixer.fixOnSave": true
+	}
+}

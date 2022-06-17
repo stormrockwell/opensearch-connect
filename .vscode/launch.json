@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Listen for XDebug in Docker",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "log": true,
+            "pathMappings": {
+                "/var/www/html/wp-content/plugins/opensearch-connect": "${workspaceFolder}",
+                "/var/www/html": "${workspaceFolder}/wp"
+            },
+        }
+    ]
+}
