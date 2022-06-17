@@ -1,0 +1,4 @@
+# Ignore compiled assets
+vendor
+node_modules
+*.cache
