@@ -53,8 +53,6 @@ class Client_Bridge {
 	 * @return object
 	 */
 	protected function get_es_client( $hosts ) {
-		print_r( 'hi' );
-		
 		return ( new \OpenSearch\ClientBuilder() )
 			->setHosts( $hosts )
 			->setBasicAuthentication( 'admin', 'admin' ) // TODO: add credentials to backend and define option.
