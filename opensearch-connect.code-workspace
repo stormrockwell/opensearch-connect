@@ -8,7 +8,17 @@
 		}
 	],
 	"settings": {
-		"phpSniffer.autoDetect": true,
-		"vscode-php-cs-fixer.fixOnSave": true
+		"[php]": {
+			"editor.formatOnSave": true,
+		},
+		"emeraldwalk.runonsave": {
+			"autoClearConsole": true,
+			"commands": [
+				{
+					"match": "\\.php$",
+					"cmd": "docker-compose exec wp cr phpunit"
+				}
+			]
+		}
 	}
 }

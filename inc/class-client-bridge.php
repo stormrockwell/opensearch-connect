@@ -12,7 +12,7 @@ namespace OSC;
 /**
  * Class Client Bridge
  *
- * Brige requests to the ElasticSearch package.
+ * Brige requests to the OpenSearch package.
  */
 class Client_Bridge {
 
@@ -24,13 +24,27 @@ class Client_Bridge {
 	protected static $instance;
 
 	/**
+	 * Index Name
+	 *
+	 * @var string
+	 */
+	public $index_name;
+
+	/**
 	 * Constructor
 	 */
 	protected function __construct() {
-		// TODO: create fields for hosts.
-		$hosts = array( '127.0.0.1' );
+		// TODO: create fields for hosts, index name, and credentials.
+		$this->index_name = 'opensearch-connect';
 
-		$this->es_client = $this->get_es_client( $hosts );
+		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
+
+		$this->os_client = $this->get_os_client( $hosts );
+
+		/* Create index if doesn't exist */
+		if ( ! $this->index_exists() ) {
+			$this->create_index();
+		}
 	}
 
 	/**
@@ -47,12 +61,12 @@ class Client_Bridge {
 	}
 
 	/**
-	 * Get ElasticSearch CLient
+	 * Get OpenSearch Client
 	 *
-	 * @param array $hosts Elasticsearch instances.
+	 * @param array $hosts OpenSearch instances.
 	 * @return object
 	 */
-	protected function get_es_client( $hosts ) {
+	protected function get_os_client( $hosts ) {
 		return ( new \OpenSearch\ClientBuilder() )
 			->setHosts( $hosts )
 			->setBasicAuthentication( 'admin', 'admin' ) // TODO: add credentials to backend and define option.
@@ -61,13 +75,115 @@ class Client_Bridge {
 	}
 
 	/**
-	 * Index OpenSearch document
+	 * Refresh indices
 	 *
-	 * @param array $document OpenSearch document.
+	 * @return array
+	 */
+	public function refresh() : array {
+		return $this->os_client->indices()->refresh();
+	}
+
+	/**
+	 * Check if index exists
+	 *
 	 * @return boolean
 	 */
-	public function index_document( $document ) {
-		return true; // TODO: actually work. $document should also be a class of Document.
+	public function index_exists() : bool {
+		return $this->os_client->indices()->exists(
+			array(
+				'index' => $this->index_name,
+			)
+		);
+	}
+
+	/**
+	 * Create OpenSearch index.
+	 *
+	 * @param array $body        Body usually containing additional settings/mappings.
+	 * @return array
+	 */
+	public function create_index( array $body = array() ) : array {
+
+		/* Delete index if it exists */
+		$this->delete_index( $this->index_name );
+
+		return $this->os_client->indices()->create(
+			array(
+				'index' => $this->index_name,
+				'body'  => $body,
+			)
+		);
+	}
+
+	/**
+	 * Delete index if exists
+	 *
+	 * @return array
+	 */
+	public function delete_index() : array {
+		return $this->os_client->indices()->delete(
+			array(
+				'index'              => $this->index_name,
+				'ignore_unavailable' => true,
+			)
+		);
+	}
+
+	/**
+	 * Index OpenSearch document
+	 *
+	 * @param string $id      Unique identifier for document.
+	 * @param array  $document OpenSearch document.
+	 * @return boolean
+	 */
+	public function index_document( string $id, array $document ) {
+		return $this->os_client->create(
+			array(
+				'index' => $this->index_name,
+				'id'    => $id,
+				'body'  => $document,
+			)
+		);
+	}
+
+	/**
+	 * Delete OpenSearch document
+	 *
+	 * @param string $id      Unique identifier for document.
+	 * @return boolean
+	 */
+	public function delete_document( string $id ) {
+		return $this->os_client->delete(
+			array(
+				'index' => $this->index_name,
+				'id'    => $id,
+			)
+		);
+	}
+
+	/**
+	 * Search
+	 *
+	 * @param array $args Search arguments.
+	 * @return array
+	 */
+	public function search( $args ) : array {
+		// TODO: Search Body class to handle args.
+		$search_body = array(
+			'size'  => 5,
+			'query' => array(
+				'match' => array(
+					'title' => $args['s'],
+				),
+			),
+		);
+
+		return $this->os_client->search(
+			array(
+				'index' => $this->index_name,
+				'body'  => $search_body,
+			)
+		);
 	}
 
 }
