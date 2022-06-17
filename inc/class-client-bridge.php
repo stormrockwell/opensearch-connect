@@ -28,9 +28,9 @@ class Client_Bridge {
 	 */
 	protected function __construct() {
 		// TODO: create fields for hosts.
-		$hosts = array( '127.0.0.1' );
+		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
 
-		$this->es_client = $this->get_es_client( $hosts );
+		$this->os_client = $this->get_os_client( $hosts );
 	}
 
 	/**
@@ -47,12 +47,12 @@ class Client_Bridge {
 	}
 
 	/**
-	 * Get ElasticSearch CLient
+	 * Get OpenSearch Client
 	 *
-	 * @param array $hosts Elasticsearch instances.
+	 * @param array $hosts OpenSearch instances.
 	 * @return object
 	 */
-	protected function get_es_client( $hosts ) {
+	protected function get_os_client( $hosts ) {
 		return ( new \OpenSearch\ClientBuilder() )
 			->setHosts( $hosts )
 			->setBasicAuthentication( 'admin', 'admin' ) // TODO: add credentials to backend and define option.

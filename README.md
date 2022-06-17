@@ -1,6 +1,8 @@
 # OpenSearch
 
-## Prerequisite
+Plugin designed to connect your WordPress instance with OpenSearch.
+
+## Prerequisites
 
 1. Docker
 2. Composer

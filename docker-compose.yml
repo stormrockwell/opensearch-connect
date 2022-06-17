@@ -14,31 +14,8 @@ services:
       MYSQL_PASSWORD: wordpress
     volumes:
       - db-data:/var/lib/mysql
-
-  # Wordpress
-  wp:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    container_name: osc-plugin-app
-    environment:
-      WORDPRESS_DB_HOST: osc-plugin-db
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-      WORDPRESS_DB_NAME: wordpress
-      WORDPRESS_DEBUG: 1
-      XDEBUG_HOST: host.docker.internal
-      XDEBUG_IDEKEY: VSCODE
-    volumes:
-      - ./wp:/var/www/html
-      - ./:/var/www/html/wp-content/plugins/opensearch-connect
-    ports:
-      - 8080:80
-    depends_on:
-      - db
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - opensearch-net
 
   opensearch-node1:
     image: opensearchproject/opensearch:latest
@@ -57,11 +34,11 @@ services:
       nofile:
         soft: 65536 # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
         hard: 65536
-    volumes:
-      - opensearch-data1:/usr/share/opensearch/data
-    ports:
+    ports: 
       - 9200:9200
       - 9600:9600 # required for Performance Analyzer
+    volumes:
+      - opensearch-data1:/usr/share/opensearch/data
     networks:
       - opensearch-net
   opensearch-node2:
@@ -97,11 +74,35 @@ services:
     networks:
       - opensearch-net
 
-# Make network name pretty
+  # Wordpress
+  wp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    container_name: osc-plugin-app
+    environment:
+      WORDPRESS_DB_HOST: osc-plugin-db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: 1
+      XDEBUG_HOST: host.docker.internal
+      XDEBUG_IDEKEY: VSCODE
+    volumes:
+      - ./wp:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/opensearch-connect
+    ports:
+      - 8080:80
+    depends_on:
+      - db 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - opensearch-net
+
 networks:
   opensearch-net:
-  default:
-    name: osc-plugin-network
 
 # Persist DB and WordPress data across containers
 volumes:
