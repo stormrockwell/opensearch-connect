@@ -57,7 +57,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		parent::tearDown();
 
 		$this->client_bridge->delete_index();
-		unset( $client_bridge );
+		unset( $this->client_bridge );
 	}
 
 	/**
