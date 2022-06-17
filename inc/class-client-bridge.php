@@ -75,6 +75,15 @@ class Client_Bridge {
 	}
 
 	/**
+	 * Refresh indices
+	 *
+	 * @return array
+	 */
+	public function refresh() : array {
+		return $this->os_client->indices()->refresh();
+	}
+
+	/**
 	 * Check if index exists
 	 *
 	 * @return boolean
@@ -148,6 +157,31 @@ class Client_Bridge {
 			array(
 				'index' => $this->index_name,
 				'id'    => $id,
+			)
+		);
+	}
+
+	/**
+	 * Search
+	 *
+	 * @param array $args Search arguments.
+	 * @return array
+	 */
+	public function search( $args ) : array {
+		// TODO: Search Body class to handle args.
+		$search_body = array(
+			'size'  => 5,
+			'query' => array(
+				'match' => array(
+					'title' => $args['s'],
+				),
+			),
+		);
+
+		return $this->os_client->search(
+			array(
+				'index' => $this->index_name,
+				'body'  => $search_body,
 			)
 		);
 	}

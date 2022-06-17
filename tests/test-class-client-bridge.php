@@ -13,6 +13,26 @@ use OSC\Client_Bridge;
 class Client_Bridge_Test extends WP_UnitTestCase {
 
 	/**
+	 * Document with ID
+	 *
+	 * @var array
+	 */
+	public $documents = array(
+		array(
+			'1',
+			array(
+				'id'       => 1,
+				'site_id'  => 0,
+				'doc_type' => 'post',
+				'title'    => 'Hello World',
+			),
+			array(
+				's' => 'Hello World',
+			),
+		),
+	);
+
+	/**
 	 * Set up
 	 *
 	 * @return void
@@ -37,7 +57,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		parent::tearDown();
 
 		$this->client_bridge->delete_index();
-		unset( $this->client_bridge );
+		unset( $client_bridge );
 	}
 
 	/**
@@ -105,6 +125,28 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'created', $output['result'], 'Expected a result of "created"' );
 	}
 
+	/**
+	 * Test Search
+	 *
+	 * @dataProvider provide_document
+	 * @depends test_index_document
+	 *
+	 * @param string $id           OpenSearch document index.
+	 * @param array  $document     OpenSearch document.
+	 * @param array  $search_args  Arguments to search for.
+	 * @return void
+	 */
+	public function test_search( $id, $document, $search_args ) {
+		/* Index document to delete. */
+		$result = $this->client_bridge->index_document( $id, $document );
+
+		/* Refresh indices to ensure the document is searchable */
+		$this->client_bridge->refresh();
+
+		$output = $this->client_bridge->search( $search_args );
+
+		$this->assertEquals( 1, $output['hits']['total']['value'], 'Expected total hits to be 1' );
+	}
 
 	/**
 	 * Test Delete Document
@@ -116,11 +158,10 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_delete_document( $id, $document ) {
-		/* Create document so we can test deleting it. */
+		/* Index document to delete. */
 		$this->client_bridge->index_document( $id, $document );
 
 		$output = $this->client_bridge->delete_document( $id );
-		$terew  = $output;
 		$this->assertEquals( 'deleted', $output['result'], 'Expected a result of "deleted"' );
 	}
 
@@ -130,16 +171,6 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function provide_document() {
-		return array(
-			array(
-				'1',
-				array(
-					'id'       => 1,
-					'site_id'  => 0,
-					'doc_type' => 'post',
-					'title'    => 'Hello World',
-				),
-			),
-		);
+		return $this->documents;
 	}
 }
