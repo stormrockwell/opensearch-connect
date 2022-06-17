@@ -16,12 +16,14 @@ RUN curl https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.ph
         && echo "*** wp-cli command installed"
 
 # Install composer
-# COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Create testing environment
-# COPY --chmod=755 bin/install-wp-tests.sh /usr/local/bin/
-# RUN echo "#!/bin/bash" > /usr/local/bin/install-wp-tests \
-#         && echo "su www-data -c \"install-wp-tests.sh \${WORDPRESS_DB_NAME}_test root root \${WORDPRESS_DB_HOST} latest\"" >> /usr/local/bin/install-wp-tests \
-#         && chmod ugo+x /usr/local/bin/install-wp-test* \
-#         && su www-data -c "/usr/local/bin/install-wp-tests.sh ${WORDPRESS_DB_NAME}_test root root '' latest true" \
-#         && echo "*** install-wp-tests installed"
+COPY --chmod=755 bin/install-wp-tests.sh /usr/local/bin/
+RUN echo "#!/bin/bash" > /usr/local/bin/install-wp-tests \
+        && echo "su www-data -c \"install-wp-tests.sh \${WORDPRESS_DB_NAME}_test root root \${WORDPRESS_DB_HOST} latest\"" >> /usr/local/bin/install-wp-tests \
+        && chmod ugo+x /usr/local/bin/install-wp-test* \
+        && su www-data -c "/usr/local/bin/install-wp-tests.sh ${WORDPRESS_DB_NAME}_test root root '' latest true" \
+        && echo "*** install-wp-tests installed"
+
+WORKDIR "wp-content/plugins/opensearch-connect"

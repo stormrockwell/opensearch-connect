@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Elastic Connect
+ * Plugin Name: OpenSearch Connect
  * Plugin URI: https://www.stormrockwell.com
- * Description: Flexible plugin for developers that adds the ability to sync and search for data on your site using ElasticSearch.
+ * Description: Flexible plugin for developers that adds the ability to sync and search for data on your site using OpenSearch.
  * Version: 0.1
  * Author: Storm Rockwell
  * Author URI: https://www.stormrockwell.com
