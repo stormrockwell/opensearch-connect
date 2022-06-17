@@ -12,7 +12,7 @@ namespace OSC;
 /**
  * Class Client Bridge
  *
- * Brige requests to the ElasticSearch package.
+ * Brige requests to the OpenSearch package.
  */
 class Client_Bridge {
 
