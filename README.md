@@ -6,6 +6,12 @@
 2. Composer
 3. Nodejs
 
+## Included DevTools & Tests
+
+1. XDebug
+2. PHPUnit
+3. PHPCS & PHPCBF
+
 ## Setup 
 
 ```

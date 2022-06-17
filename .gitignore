@@ -1,5 +1,5 @@
 # Ignore compiled assets
-vendor
-node_modules
-wp
+vendor/
+node_modules/
+wp/
 *.cache
