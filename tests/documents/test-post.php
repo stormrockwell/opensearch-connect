@@ -22,7 +22,7 @@ class Post_Test extends WP_UnitTestCase {
 
 		$this->post = $this->factory->post->create_and_get();
 
-		$this->document = new Post();
+		$this->document = new Post( $this->post );
 	}
 
 	/**
@@ -34,16 +34,25 @@ class Post_Test extends WP_UnitTestCase {
 		parent::tearDown();
 
 		unset( $this->post );
+		unset( $this->document );
 	}
 
 	/**
-	 * Test get data
+	 * Test set field data from object.
 	 *
 	 * @return void
 	 */
-	public function test_get_data() {
-		$output = $this->document->get_data();
+	public function test_set_field_data_from_object() {
+		$document = $this->getMockBuilder( 'OSC\Document\Post' )
+			->disableOriginalConstructor()
+			->getMock();
 
-		$this->assertIsArray( $output );
+		$reflection          = new ReflectionClass( $document );
+		$reflection_property = $reflection->getMethod( 'set_field_data_from_object' );
+		$reflection_property->setAccessible( true );
+
+		$output = $reflection_property->invokeArgs( $document, array( $this->post ) );
+
+		$this->assertTrue( $output );
 	}
 }

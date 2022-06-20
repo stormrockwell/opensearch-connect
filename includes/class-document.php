@@ -19,12 +19,15 @@ abstract class Document {
 	 *
 	 * @var array
 	 */
-	private $base_fields = array(
+	protected $base_fields = array(
 		'document_location' => array(
 			'id'      => 1,
-			'site_id' => 0,
 			'object'  => '', // post, user, term, etc.
 			'type'    => '', // post, page, media, etc.
+
+			// TODO: add multisite/network support.
+			'blog_id' => 0, // ID of the site, WordPress naming can be confusing for blog vs site.
+			'site_id' => 0, // ID of the network.
 		),
 		'menu_order'        => 0,
 		'media_id'          => 0,
@@ -35,6 +38,8 @@ abstract class Document {
 		'url'               => '',
 		'tax'               => array(), // Taxonomies and terms.
 		'meta'              => array(),
+
+		// TODO: add hide support.
 		'hide_from_search'  => false,
 	);
 
@@ -43,7 +48,7 @@ abstract class Document {
 	 *
 	 * @var array
 	 */
-	private $fields = array();
+	protected $fields = array();
 
 	/**
 	 * Constructor
