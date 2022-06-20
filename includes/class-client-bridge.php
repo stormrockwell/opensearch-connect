@@ -32,10 +32,12 @@ class Client_Bridge {
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $index_name  Name of index. Will override field for index name.
 	 */
-	protected function __construct() {
-		// TODO: create fields for hosts, index name, and credentials.
-		$this->index_name = 'opensearch-connect';
+	protected function __construct( string $index_name = '' ) {
+		// TODO: create fields for hosts, index name, and credentials. Change this variable if in test env.
+		$this->index_name = apply_filters( 'osc/index_name', 'opensearch-connect' );
 
 		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
 
@@ -136,29 +138,33 @@ class Client_Bridge {
 	 * @param array  $document OpenSearch document.
 	 * @return boolean
 	 */
-	public function index_document( string $id, array $document ) {
-		return $this->os_client->create(
+	public function index_document( string $id, array $document ) : bool {
+		$response = $this->os_client->create(
 			array(
 				'index' => $this->index_name,
 				'id'    => $id,
 				'body'  => $document,
 			)
 		);
+
+		return 'created' === $response['result'];
 	}
 
 	/**
 	 * Delete OpenSearch document
 	 *
-	 * @param string $id      Unique identifier for document.
+	 * @param  string $id  Unique identifier for document.
 	 * @return boolean
 	 */
-	public function delete_document( string $id ) {
-		return $this->os_client->delete(
+	public function delete_document( string $id ) : bool {
+		$response = $this->os_client->delete(
 			array(
 				'index' => $this->index_name,
 				'id'    => $id,
 			)
 		);
+
+		return 'deleted' === $response['result'];
 	}
 
 	/**

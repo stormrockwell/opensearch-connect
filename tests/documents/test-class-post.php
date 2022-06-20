@@ -1,6 +1,6 @@
 <?php
 /**
- * Test Document class
+ * Test class Post
  *
  * @package Opensearch_Connect
  */
@@ -8,7 +8,7 @@
 use OSC\Document\Post;
 
 /**
- * Document_Test class
+ * Post_Test class
  */
 class Post_Test extends WP_UnitTestCase {
 
@@ -20,8 +20,7 @@ class Post_Test extends WP_UnitTestCase {
 	public function setUp() : void {
 		parent::setUp();
 
-		$this->post = $this->factory->post->create_and_get();
-
+		$this->post     = $this->factory->post->create_and_get();
 		$this->document = new Post( $this->post );
 	}
 
