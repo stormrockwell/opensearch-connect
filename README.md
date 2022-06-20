@@ -30,7 +30,7 @@ docker-compose build wp (only need to do this once)
 docker-compose up -d
 ```
 
-You can now access the WordPress instance at https://localhost:8080, OpenSearch at https://localhost:9200 and OpenSearch dashboards at https://localhost:5601
+You can now access the WordPress instance at https://localhost:8080, OpenSearch at https://localhost:9200 and OpenSearch dashboards at http://localhost:5601
 
 ### Using Test Suite
 
