@@ -43,10 +43,19 @@ class Indexer {
 	protected $indexable_terms = array( 'post_tag', 'category' );
 
 	/**
+	 * Instance of Client_Bridge
+	 *
+	 * @var Client_Bridge
+	 */
+	public $client_bridge;
+
+	/**
 	 * Constructor
 	 */
 	protected function __construct() {
 		$this->client_bridge = Client_Bridge::get_instance();
+
+		$this->add_hooks();
 	}
 
 	/**
@@ -60,6 +69,19 @@ class Indexer {
 		}
 
 		return static::$instance;
+	}
+
+	/**
+	 * Add WP Hooks.
+	 *
+	 * @return void
+	 */
+	private function add_hooks() {
+		if ( ! defined( 'OSC_IS_TESTING' ) ) {
+			add_action( 'save_post', array( $this, 'index_post' ), PHP_INT_MAX );
+			add_action( 'deleted_post', array( $this, 'delete_post' ), PHP_INT_MAX );
+			add_action( 'transition_post_status', array( $this, 'handle_post_status_change' ), PHP_INT_MAX, 3 );
+		}
 	}
 
 	/**
@@ -127,6 +149,22 @@ class Indexer {
 		return $this->client_bridge->delete_document(
 			$post_document->get_document_id()
 		);
+	}
+
+	/**
+	 * Handle post status change
+	 *
+	 * @param string   $new_status  New post status.
+	 * @param string   $old_status  Old post status.
+	 * @param \WP_Post $post        Post object that was changed.
+	 * @return void
+	 */
+	public function handle_post_status_change( string $new_status, string $old_status, \WP_Post $post ) {
+		if ( 'publish' === $new_status ) {
+			$this->index_post( $post->ID );
+		} else {
+			$this->delete_post( $post->ID );
+		}
 	}
 
 }

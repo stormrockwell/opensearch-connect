@@ -21,6 +21,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		array(
 			'object-1',
 			array(
+				'id'    => '1',
 				'title' => 'Hello World',
 			),
 			array(

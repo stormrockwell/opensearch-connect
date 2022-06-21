@@ -40,4 +40,10 @@ spl_autoload_register(
 	}
 );
 
-OSC\Client_Bridge::get_instance();
+add_action(
+	'plugins_loaded',
+	function() {
+		OSC\Client_Bridge::get_instance();
+		OSC\Indexer::get_instance();
+	}
+);

@@ -49,7 +49,7 @@ class Post extends \OSC\Document {
 				),
 				'parent_id'         => $object->post_parent,
 				'title'             => $object->post_title,
-				'content'           => $object->post_content,
+				'content'           => $this->format_content( $object->post_content ), // phpcs:ignore
 				'excerpt'           => $object->post_excerpt,
 				'media_id'          => get_post_thumbnail_id( $object->ID ),
 				'menu_order'        => $object->menu_order,
@@ -74,5 +74,18 @@ class Post extends \OSC\Document {
 		}
 
 		return 'post-' . $this->fields['document_location']['id'];
+	}
+
+	/**
+	 * Format content
+	 *
+	 * @param  string $content  Content to format.
+	 * @return string
+	 */
+	protected function format_content( string $content ) : string {
+		$content = do_shortcode( apply_filters( 'the_content', $content ) ); // phpcs:ignore
+		$content = wp_strip_all_tags( $content );
+
+		return $content;
 	}
 }

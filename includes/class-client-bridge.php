@@ -147,15 +147,31 @@ class Client_Bridge {
 	 * @return boolean
 	 */
 	public function index_document( string $id, array $document ) : bool {
-		$response = $this->os_client->create(
-			array(
-				'index' => $this->index_name,
-				'id'    => $id,
-				'body'  => $document,
-			)
-		);
+		$document_exists = $this->document_exists( $id );
 
-		return 'created' === $response['result'];
+		if ( $document_exists ) {
+			$response = $this->os_client->update(
+				array(
+					'index' => $this->index_name,
+					'id'    => $id,
+					'body'  => array(
+						'doc' => $document,
+					),
+				)
+			);
+
+			return 'updated' === $response['result'] || 'noop' === $response['result'];
+		} else {
+			$response = $this->os_client->create(
+				array(
+					'index' => $this->index_name,
+					'id'    => $id,
+					'body'  => $document,
+				)
+			);
+
+			return 'created' === $response['result'];
+		}
 	}
 
 	/**
@@ -165,14 +181,36 @@ class Client_Bridge {
 	 * @return boolean
 	 */
 	public function delete_document( string $id ) : bool {
-		$response = $this->os_client->delete(
+		$document_exists = $this->document_exists( $id );
+
+		if ( $document_exists ) {
+			$response = $this->os_client->delete(
+				array(
+					'index' => $this->index_name,
+					'id'    => $id,
+				)
+			);
+
+			return 'deleted' === $response['result'];
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if OpenSearch document exists.
+	 *
+	 * @param  string $id  Unique identifier for document.
+	 * @return boolean
+	 */
+	public function document_exists( string $id ) : bool {
+		$this->refresh();
+		return $this->os_client->exists(
 			array(
 				'index' => $this->index_name,
 				'id'    => $id,
 			)
 		);
-
-		return 'deleted' === $response['result'];
 	}
 
 	/**
