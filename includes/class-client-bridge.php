@@ -36,14 +36,22 @@ class Client_Bridge {
 	 * @param string $index_name  Name of index. Will override field for index name.
 	 */
 	protected function __construct( string $index_name = '' ) {
-		// TODO: create fields for hosts, index name, and credentials. Change this variable if in test env.
+		// TODO: create fields for hosts, index name, and credentials.
+		// TODO: handle multisite.
+		/**
+		 * Hook for OpenSearch index name
+		 *
+		 * @hook osc/index_name
+		 * @param $index_name OpenSearch index name.
+		 * @return string
+		 */
 		$this->index_name = apply_filters( 'osc/index_name', 'opensearch-connect' );
 
 		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
 
 		$this->os_client = $this->get_os_client( $hosts );
 
-		/* Create index if doesn't exist */
+		// Create index if doesn't exist.
 		if ( ! $this->index_exists() ) {
 			$this->create_index();
 		}

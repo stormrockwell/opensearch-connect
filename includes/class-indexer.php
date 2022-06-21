@@ -84,6 +84,7 @@ class Indexer {
 		/**
 		 * Filter for is post indexable
 		 *
+		 * @hook osc/is_post_indexable
 		 * @param  bool    $is_indexable  Whether or not a post can be indexed.
 		 * @param  WP_Post $post          WP_Post object.
 		 * @return bool

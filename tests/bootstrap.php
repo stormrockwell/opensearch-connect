@@ -35,5 +35,14 @@ function _manually_load_plugin() {
 
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
+// Set OpenSearch test index.
+tests_add_filter(
+	'osc/index_name',
+	function( $is_multisite ) {
+		return 'opensearch-connect-test';
+	},
+	PHP_INT_MAX
+);
+
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";

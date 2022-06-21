@@ -21,11 +21,9 @@ abstract class Document {
 	 */
 	protected $base_fields = array(
 		'document_location' => array(
-			'id'      => 1,
-			'object'  => '', // post, user, term, etc.
-			'type'    => '', // post, page, media, etc.
-			'blog_id' => 0, // ID of the site, WordPress naming can be confusing for blog vs site.
-			'site_id' => 0, // ID of the network.
+			'id'     => 1,
+			'object' => '', // post, user, term, etc.
+			'type'   => '', // post, page, media, etc.
 		),
 		'menu_order'        => 0,
 		'media_id'          => 0,
@@ -55,22 +53,6 @@ abstract class Document {
 	 */
 	public function __construct( $object ) {
 		$this->set_field_data_from_object( $object );
-		$this->set_multisite_fields();
-	}
-
-	/**
-	 * Set multisite base fields
-	 *
-	 * @return void
-	 */
-	public function set_multisite_fields() {
-		if ( is_multisite() ) {
-			$this->fields['document_location']['blog_id'] = get_current_blog_id();
-			$this->fields['document_location']['site_id'] = get_current_site_id();
-		} else {
-			$this->fields['document_location']['blog_id'] = 0;
-			$this->fields['document_location']['site_id'] = 0;
-		}
 	}
 
 	/**
@@ -97,6 +79,7 @@ abstract class Document {
 		/**
 		 * Filter for document field data
 		 *
+		 * @hook osc/document/get_field_data
 		 * @param  array $fields  Document fields.
 		 * @return array
 		 */

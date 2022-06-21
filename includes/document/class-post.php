@@ -73,10 +73,6 @@ class Post extends \OSC\Document {
 			return false;
 		}
 
-		$site_id = $this->fields['document_location']['site_id'];
-		$blog_id = $this->fields['document_location']['blog_id'];
-		$post_id = $this->fields['document_location']['id'];
-
-		return "post-{$site_id}-{$blog_id}-{$post_id}";
+		return 'post-' . $this->fields['document_location']['id'];
 	}
 }

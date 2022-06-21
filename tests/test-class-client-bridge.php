@@ -19,12 +19,9 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	 */
 	public $documents = array(
 		array(
-			'post-0-0-1',
+			'object-1',
 			array(
-				'id'       => 1,
-				'site_id'  => 0,
-				'doc_type' => 'post',
-				'title'    => 'Hello World',
+				'title' => 'Hello World',
 			),
 			array(
 				's' => 'Hello World',
@@ -41,11 +38,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->client_bridge = Client_Bridge::get_instance();
-
-		/* Create index if doesn't exist */
-		if ( ! $this->client_bridge->index_exists() ) {
-			$this->client_bridge->create_index();
-		}
+		$this->client_bridge->create_index();
 	}
 
 	/**
