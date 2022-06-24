@@ -49,7 +49,8 @@ class Post extends \OSC\Document {
 				),
 				'parent_id'         => $object->post_parent,
 				'title'             => $object->post_title,
-				'content'           => $this->format_content( $object->post_content ), // phpcs:ignore
+				'slug'              => $object->post_name,
+				'content'           => $this->format_content( $object->post_content ),
 				'excerpt'           => $object->post_excerpt,
 				'media_id'          => get_post_thumbnail_id( $object->ID ),
 				'menu_order'        => $object->menu_order,

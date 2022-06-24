@@ -28,6 +28,7 @@ abstract class Document {
 		'menu_order'        => 0,
 		'media_id'          => 0,
 		'title'             => '',
+		'slug'              => '',
 		'content'           => '',
 		'excerpt'           => '',
 		'keywords'          => '',
