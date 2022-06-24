@@ -22,6 +22,7 @@ class Indexer_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->post_id = $this->factory->post->create();
+		$this->term    = $this->factory->term->create_and_get();
 
 		$this->indexer = Indexer::get_instance();
 
@@ -57,6 +58,19 @@ class Indexer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test index term
+	 *
+	 * @return void
+	 */
+	public function test_index_term() {
+		$input = $this->term;
+
+		$output = $this->indexer->index_term( $input );
+
+		$this->assertTrue( $output );
+	}
+
+	/**
 	 * Test indexing an existing post.
 	 *
 	 * @return void
@@ -64,10 +78,7 @@ class Indexer_Test extends WP_UnitTestCase {
 	public function test_index_existing_post() {
 		$input = $this->post_id;
 
-		// Index post.
 		$this->indexer->index_post( $input );
-
-		// Try to index it again.
 		$output = $this->indexer->index_post( $input );
 
 		$this->assertTrue( $output );
@@ -108,6 +119,24 @@ class Indexer_Test extends WP_UnitTestCase {
 
 		// Delete post again.
 		$output = $this->indexer->delete_post( $input );
+
+		$this->assertTrue( $output );
+	}
+
+	/**
+	 * Test delete term.
+	 *
+	 * @return void
+	 */
+	public function test_delete_term() {
+		$input = $this->term;
+
+		// Index post to delete.
+		$this->indexer->index_term( $input );
+		$this->client_bridge->refresh();
+
+		// Delete post.
+		$output = $this->indexer->delete_term( $input );
 
 		$this->assertTrue( $output );
 	}

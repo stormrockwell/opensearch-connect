@@ -25,9 +25,6 @@ class Term extends \OSC\Document {
 			return false;
 		}
 
-		// Get meta data.
-		$meta_data = $object->meta;
-
 		// Set field data.
 		$this->fields = wp_parse_args(
 			array(
@@ -36,13 +33,13 @@ class Term extends \OSC\Document {
 					'object' => 'term',
 					'type'   => $object->taxonomy,
 				),
-				'parent_id'         => $object->post_parent,
+				'parent_id'         => $object->parent,
 				'title'             => $object->name,
 				'slug'              => $object->slug,
 				'content'           => $this->format_content( $object->description ),
 				'menu_order'        => 0, // TODO: Add support for taxonomy terms order plugin (term_order).
 				'url'               => get_term_link( $object ),
-				'meta'              => $meta_data,
+				'meta'              => $object->meta,
 			),
 			$this->base_fields
 		);

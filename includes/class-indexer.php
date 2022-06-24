@@ -115,6 +115,31 @@ class Indexer {
 	}
 
 	/**
+	 * Is Term Indexable
+	 *
+	 * @param  \WP_Term $term  WP_Term object.
+	 * @return boolean
+	 */
+	private function is_term_indexable( \WP_Term $term ) : bool {
+		$is_indexable = true;
+
+		// Check indexable term types.
+		if ( ! in_array( $term->taxonomy, $this->indexable_terms, true ) ) {
+			$is_indexable = false;
+		}
+
+		/**
+		 * Filter for is term indexable
+		 *
+		 * @hook osc/is_term_indexable
+		 * @param  bool    $is_indexable  Whether or not a term can be indexed.
+		 * @param  WP_Term $term          WP_Term object.
+		 * @return bool
+		 */
+		return apply_filters( 'osc/is_term_indexable', $is_indexable, $term );
+	}
+
+	/**
 	 * Index Post
 	 *
 	 * @param  integer $post_id  Post ID to index.
@@ -137,6 +162,25 @@ class Indexer {
 	}
 
 	/**
+	 * Index Term
+	 *
+	 * @param  \WP_Term $term WP_Term object to index.
+	 * @return boolean
+	 */
+	public function index_term( \WP_Term $term ) : bool {
+		if ( ! $this->is_term_indexable( $term ) ) {
+			return false;
+		}
+
+		$term_document = new Document\Term( $term );
+
+		return $this->client_bridge->index_document(
+			$term_document->get_document_id(),
+			$term_document->get_field_data()
+		);
+	}
+
+	/**
 	 * Delete Post
 	 *
 	 * @param integer $post_id  Post ID to delete.
@@ -148,6 +192,20 @@ class Indexer {
 
 		return $this->client_bridge->delete_document(
 			$post_document->get_document_id()
+		);
+	}
+
+	/**
+	 * Delete Term
+	 *
+	 * @param  \WP_Term $term WP_Term to delete.
+	 * @return boolean
+	 */
+	public function delete_term( \WP_Term $term ) : bool {
+		$term_document = new Document\Term( $term );
+
+		return $this->client_bridge->delete_document(
+			$term_document->get_document_id()
 		);
 	}
 
