@@ -32,10 +32,8 @@ class Client_Bridge {
 
 	/**
 	 * Constructor
-	 *
-	 * @param string $index_name  Name of index. Will override field for index name.
 	 */
-	protected function __construct( string $index_name = '' ) {
+	protected function __construct() {
 		// TODO: create fields for hosts, index name, and credentials.
 		// TODO: handle multisite.
 		/**
@@ -113,8 +111,7 @@ class Client_Bridge {
 	 * @return array
 	 */
 	public function create_index( array $body = array() ) : array {
-
-		/* Delete index if it exists */
+		// Delete index if it exists.
 		$this->delete_index( $this->index_name );
 
 		return $this->os_client->indices()->create(

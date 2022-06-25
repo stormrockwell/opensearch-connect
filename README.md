@@ -7,6 +7,7 @@ Plugin designed to connect your WordPress instance with OpenSearch.
 1. Docker
 2. Composer
 3. Nodejs
+4. PHP - Optional to power PHP Code Sniffer for VSCode
 
 ## Included DevTools & Tests
 

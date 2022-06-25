@@ -201,15 +201,16 @@ class Indexer {
 				}
 				break;
 			default:
-				// TODO: Add custom document by default.
+				$document = new Document\Custom( $object );
 		}
 
 		/**
 		 * Filter get document by object.
 		 *
 		 * @hook osc/indexer/get_document_by_object
-		 * @param object $document Document class.
-		 * @param object $object   Object passed to retrieve the document class.
+		 * @param object $document       Document class.
+		 * @param object $object         Object passed to retrieve the document class.
+		 * @return object|null $document Document class or null to not index.
 		 */
 		return apply_filters( 'osc/indexer/get_document_by_object', $document, $object );
 	}
