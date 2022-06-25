@@ -27,35 +27,66 @@ class Post extends \OSC\Document {
 
 		// Get taxonomy data.
 		$object_taxonomies = get_object_taxonomies( $object->post_type );
-		$tax_data          = array_map(
-			function( $tax_slug ) {
-				return wp_get_post_terms( $tax_slug );
-			},
-			$object_taxonomies
-		);
+		$tax_data          = array();
+		foreach ( $object_taxonomies as $tax_slug ) {
+			$tax_data[ $tax_slug ] = wp_get_post_terms( $tax_slug );
+		}
 
 		// Get meta data.
-		$meta_data = get_post_meta( $object->ID );
+		$meta_data                  = get_post_meta( $object->ID );
+		$meta_data['author']        = $object->post_author;
+		$meta_data['status']        = $object->post_status;
+		$meta_data['date']          = $object->post_date;
+		$meta_data['date_modified'] = $object->post_modified;
 
+		// Set field data.
 		$this->fields = wp_parse_args(
-			$this->base_fields,
 			array(
 				'document_location' => array(
 					'id'     => $object->ID,
 					'object' => 'post',
 					'type'   => $object->post_type,
 				),
+				'parent_id'         => $object->post_parent,
 				'title'             => $object->post_title,
-				'content'           => $object->content,
-				'excerpt'           => $object->excerpt,
+				'slug'              => $object->post_name,
+				'content'           => $this->format_content( $object->post_content ),
+				'excerpt'           => $object->post_excerpt,
 				'media_id'          => get_post_thumbnail_id( $object->ID ),
 				'menu_order'        => $object->menu_order,
-				'url'               => '',
+				'url'               => get_permalink( $object ),
 				'tax'               => $tax_data, // Taxonomies and terms.
 				'meta'              => $meta_data,
-			)
+			),
+			$this->base_fields
 		);
 
 		return true;
+	}
+
+	/**
+	 * Get Document ID.
+	 *
+	 * @return false|integer
+	 */
+	public function get_document_id() {
+		if ( empty( $this->fields ) || ! $this->fields['document_location']['id'] ) {
+			return false;
+		}
+
+		return 'post-' . $this->fields['document_location']['id'];
+	}
+
+	/**
+	 * Format content
+	 *
+	 * @param  string $content  Content to format.
+	 * @return string
+	 */
+	protected function format_content( string $content ) : string {
+		$content = do_shortcode( apply_filters( 'the_content', $content ) ); // phpcs:ignore
+		$content = wp_strip_all_tags( $content );
+
+		return $content;
 	}
 }

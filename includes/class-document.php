@@ -21,17 +21,14 @@ abstract class Document {
 	 */
 	protected $base_fields = array(
 		'document_location' => array(
-			'id'      => 1,
-			'object'  => '', // post, user, term, etc.
-			'type'    => '', // post, page, media, etc.
-
-			// TODO: add multisite/network support.
-			'blog_id' => 0, // ID of the site, WordPress naming can be confusing for blog vs site.
-			'site_id' => 0, // ID of the network.
+			'id'     => 1,
+			'object' => '', // post, user, term, etc.
+			'type'   => '', // post, page, media, etc.
 		),
 		'menu_order'        => 0,
 		'media_id'          => 0,
 		'title'             => '',
+		'slug'              => '',
 		'content'           => '',
 		'excerpt'           => '',
 		'keywords'          => '',
@@ -60,6 +57,13 @@ abstract class Document {
 	}
 
 	/**
+	 * Get Document ID
+	 *
+	 * @return integer
+	 */
+	abstract public function get_document_id();
+
+	/**
 	 * Get Data
 	 *
 	 * @param  array|object $object  Object or array used to parse out field data.
@@ -73,6 +77,13 @@ abstract class Document {
 	 * @return  array|bool  Return false if field data was never set.
 	 */
 	public function get_field_data() {
+		/**
+		 * Filter for document field data
+		 *
+		 * @hook osc/document/get_field_data
+		 * @param  array $fields  Document fields.
+		 * @return array
+		 */
 		$field_data = apply_filters( 'osc/document/get_field_data', $this->fields );
 
 		return ! empty( $field_data ) ? $field_data : false;

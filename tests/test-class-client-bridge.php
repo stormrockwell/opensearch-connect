@@ -19,12 +19,10 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	 */
 	public $documents = array(
 		array(
-			'1',
+			'object-1',
 			array(
-				'id'       => 1,
-				'site_id'  => 0,
-				'doc_type' => 'post',
-				'title'    => 'Hello World',
+				'id'    => '1',
+				'title' => 'Hello World',
 			),
 			array(
 				's' => 'Hello World',
@@ -41,11 +39,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->client_bridge = Client_Bridge::get_instance();
-
-		/* Create index if doesn't exist */
-		if ( ! $this->client_bridge->index_exists() ) {
-			$this->client_bridge->create_index();
-		}
+		$this->client_bridge->create_index();
 	}
 
 	/**
@@ -122,7 +116,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 	 */
 	public function test_index_document( $id, $document ) {
 		$output = $this->client_bridge->index_document( $id, $document );
-		$this->assertEquals( 'created', $output['result'], 'Expected a result of "created"' );
+		$this->assertTrue( $output );
 	}
 
 	/**
@@ -162,7 +156,7 @@ class Client_Bridge_Test extends WP_UnitTestCase {
 		$this->client_bridge->index_document( $id, $document );
 
 		$output = $this->client_bridge->delete_document( $id );
-		$this->assertEquals( 'deleted', $output['result'], 'Expected a result of "deleted"' );
+		$this->assertTrue( $output );
 	}
 
 	/**

@@ -1,16 +1,16 @@
 <?php
 /**
- * Test Document class
+ * Test class Term
  *
  * @package Opensearch_Connect
  */
 
-use OSC\Document\Post;
+use OSC\Document\Term;
 
 /**
- * Document_Test class
+ * Term_Test class
  */
-class Post_Test extends WP_UnitTestCase {
+class Term_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up
@@ -20,9 +20,14 @@ class Post_Test extends WP_UnitTestCase {
 	public function setUp() : void {
 		parent::setUp();
 
-		$this->post = $this->factory->post->create_and_get();
+		$this->term = $this->factory->term->create_and_get(
+			array(
+				'name'     => 'Category Name',
+				'taxonomy' => 'category',
+			)
+		);
 
-		$this->document = new Post( $this->post );
+		$this->document = new Term( $this->term );
 	}
 
 	/**
@@ -34,6 +39,7 @@ class Post_Test extends WP_UnitTestCase {
 		parent::tearDown();
 
 		unset( $this->post );
+		unset( $this->term );
 		unset( $this->document );
 	}
 
@@ -43,7 +49,7 @@ class Post_Test extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_set_field_data_from_object() {
-		$document = $this->getMockBuilder( 'OSC\Document\Post' )
+		$document = $this->getMockBuilder( 'OSC\Document\Term' )
 			->disableOriginalConstructor()
 			->getMock();
 
@@ -51,7 +57,7 @@ class Post_Test extends WP_UnitTestCase {
 		$reflection_property = $reflection->getMethod( 'set_field_data_from_object' );
 		$reflection_property->setAccessible( true );
 
-		$output = $reflection_property->invokeArgs( $document, array( $this->post ) );
+		$output = $reflection_property->invokeArgs( $document, array( $this->term ) );
 
 		$this->assertTrue( $output );
 	}

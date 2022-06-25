@@ -32,16 +32,26 @@ class Client_Bridge {
 
 	/**
 	 * Constructor
+	 *
+	 * @param string $index_name  Name of index. Will override field for index name.
 	 */
-	protected function __construct() {
+	protected function __construct( string $index_name = '' ) {
 		// TODO: create fields for hosts, index name, and credentials.
-		$this->index_name = 'opensearch-connect';
+		// TODO: handle multisite.
+		/**
+		 * Hook for OpenSearch index name
+		 *
+		 * @hook osc/index_name
+		 * @param $index_name OpenSearch index name.
+		 * @return string
+		 */
+		$this->index_name = apply_filters( 'osc/index_name', 'osc' );
 
 		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
 
 		$this->os_client = $this->get_os_client( $hosts );
 
-		/* Create index if doesn't exist */
+		// Create index if doesn't exist.
 		if ( ! $this->index_exists() ) {
 			$this->create_index();
 		}
@@ -136,24 +146,66 @@ class Client_Bridge {
 	 * @param array  $document OpenSearch document.
 	 * @return boolean
 	 */
-	public function index_document( string $id, array $document ) {
-		return $this->os_client->create(
-			array(
-				'index' => $this->index_name,
-				'id'    => $id,
-				'body'  => $document,
-			)
-		);
+	public function index_document( string $id, array $document ) : bool {
+		$document_exists = $this->document_exists( $id );
+
+		if ( $document_exists ) {
+			$response = $this->os_client->update(
+				array(
+					'index' => $this->index_name,
+					'id'    => $id,
+					'body'  => array(
+						'doc' => $document,
+					),
+				)
+			);
+
+			return 'updated' === $response['result'] || 'noop' === $response['result'];
+		} else {
+			$response = $this->os_client->create(
+				array(
+					'index' => $this->index_name,
+					'id'    => $id,
+					'body'  => $document,
+				)
+			);
+
+			return 'created' === $response['result'];
+		}
 	}
 
 	/**
 	 * Delete OpenSearch document
 	 *
-	 * @param string $id      Unique identifier for document.
+	 * @param  string $id  Unique identifier for document.
 	 * @return boolean
 	 */
-	public function delete_document( string $id ) {
-		return $this->os_client->delete(
+	public function delete_document( string $id ) : bool {
+		$document_exists = $this->document_exists( $id );
+
+		if ( $document_exists ) {
+			$response = $this->os_client->delete(
+				array(
+					'index' => $this->index_name,
+					'id'    => $id,
+				)
+			);
+
+			return 'deleted' === $response['result'];
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if OpenSearch document exists.
+	 *
+	 * @param  string $id  Unique identifier for document.
+	 * @return boolean
+	 */
+	public function document_exists( string $id ) : bool {
+		$this->refresh();
+		return $this->os_client->exists(
 			array(
 				'index' => $this->index_name,
 				'id'    => $id,
