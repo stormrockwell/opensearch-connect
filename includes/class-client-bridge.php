@@ -45,7 +45,7 @@ class Client_Bridge {
 		 * @param $index_name OpenSearch index name.
 		 * @return string
 		 */
-		$this->index_name = apply_filters( 'osc/index_name', 'opensearch-connect' );
+		$this->index_name = apply_filters( 'osc/index_name', 'osc' );
 
 		$hosts = array( 'https://opensearch-node1:9200', 'https://opensearch-node2:9200' );
 

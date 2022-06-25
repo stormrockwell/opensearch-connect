@@ -43,6 +43,13 @@ class Indexer {
 	protected $indexable_terms = array( 'post_tag', 'category' );
 
 	/**
+	 * Users indexable.
+	 *
+	 * @var boolean
+	 */
+	protected $users_indexable = true;
+
+	/**
 	 * Instance of Client_Bridge
 	 *
 	 * @var Client_Bridge
@@ -78,9 +85,20 @@ class Indexer {
 	 */
 	private function add_hooks() {
 		if ( ! defined( 'OSC_IS_TESTING' ) ) {
-			add_action( 'save_post', array( $this, 'index_post' ), PHP_INT_MAX );
-			add_action( 'deleted_post', array( $this, 'delete_post' ), PHP_INT_MAX );
+			// Post hooks.
+			add_action( 'save_post', array( $this, 'handle_save_post' ), PHP_INT_MAX );
+			add_action( 'deleted_post', array( $this, 'handle_delete_post' ), PHP_INT_MAX );
 			add_action( 'transition_post_status', array( $this, 'handle_post_status_change' ), PHP_INT_MAX, 3 );
+
+			// Term hooks.
+			add_action( 'created_term', array( $this, 'handle_save_term' ), PHP_INT_MAX, 3 );
+			add_action( 'edited_term', array( $this, 'handle_save_term' ), PHP_INT_MAX, 3 );
+			add_action( 'pre_delete_term', array( $this, 'handle_delete_term' ), PHP_INT_MAX, 2 );
+
+			// User hooks.
+			add_action( 'user_register', array( $this, 'handle_save_user' ), PHP_INT_MAX );
+			add_action( 'profile_update', array( $this, 'handle_save_user' ), PHP_INT_MAX );
+			add_action( 'delete_user', array( $this, 'handle_delete_user' ), PHP_INT_MAX, 3 );
 		}
 	}
 
@@ -140,72 +158,96 @@ class Indexer {
 	}
 
 	/**
-	 * Index Post
+	 * Are users Indexable
 	 *
-	 * @param  integer $post_id  Post ID to index.
 	 * @return boolean
 	 */
-	public function index_post( int $post_id ) : bool {
-		$post = get_post( $post_id );
+	private function are_users_indexable() : bool {
+		$is_indexable = $this->users_indexable;
 
-		// Check indexable post types.
-		if ( ! $this->is_post_indexable( $post ) ) {
-			return false;
+		/**
+		 * Filter for are users indexable
+		 *
+		 * @hook osc/are_users_indexable
+		 * @param  bool    $is_indexable  Whether or not a user can be indexed.
+		 * @return bool
+		 */
+		return apply_filters( 'osc/are_users_indexable', $is_indexable );
+	}
+
+	/**
+	 * Get document by object
+	 *
+	 * @param  object $object  Object to be evaluated depending on class name.
+	 * @return object|null
+	 */
+	public function get_document_by_object( object $object ) {
+		$document = null;
+
+		switch ( get_class( $object ) ) {
+			case 'WP_Post':
+				if ( $this->is_post_indexable( $object ) ) {
+					$document = new Document\Post( $object );
+				}
+				break;
+			case 'WP_Term':
+				if ( $this->is_term_indexable( $object ) ) {
+					$document = new Document\Term( $object );
+				}
+				break;
+			case 'WP_User':
+				if ( $this->are_users_indexable() ) {
+					$document = new Document\User( $object );
+				}
+				break;
+			default:
+				// TODO: Add custom document by default.
 		}
 
-		$post_document = new Document\Post( $post );
-
-		return $this->client_bridge->index_document(
-			$post_document->get_document_id(),
-			$post_document->get_field_data()
-		);
+		/**
+		 * Filter get document by object.
+		 *
+		 * @hook osc/indexer/get_document_by_object
+		 * @param object $document Document class.
+		 * @param object $object   Object passed to retrieve the document class.
+		 */
+		return apply_filters( 'osc/indexer/get_document_by_object', $document, $object );
 	}
 
 	/**
-	 * Index Term
+	 * Index Document
 	 *
-	 * @param  \WP_Term $term WP_Term object to index.
+	 * @param  object $object  Mixed object types.
 	 * @return boolean
 	 */
-	public function index_term( \WP_Term $term ) : bool {
-		if ( ! $this->is_term_indexable( $term ) ) {
-			return false;
+	public function index_document( object $object ) : bool {
+		$document = $this->get_document_by_object( $object );
+
+		if ( null === $document ) {
+			return true;
 		}
 
-		$term_document = new Document\Term( $term );
-
 		return $this->client_bridge->index_document(
-			$term_document->get_document_id(),
-			$term_document->get_field_data()
+			$document->get_document_id(),
+			$document->get_field_data()
 		);
 	}
 
 	/**
-	 * Delete Post
+	 * Delete Document
 	 *
-	 * @param integer $post_id  Post ID to delete.
+	 * @param  object $object  Mixed object types.
 	 * @return boolean
 	 */
-	public function delete_post( int $post_id ) : bool {
-		$post          = get_post( $post_id );
-		$post_document = new Document\Post( $post );
+	public function delete_document( object $object ) : bool {
+		$document = $this->get_document_by_object( $object );
+
+		if ( null === $document ) {
+			return true;
+		}
 
 		return $this->client_bridge->delete_document(
-			$post_document->get_document_id()
-		);
-	}
-
-	/**
-	 * Delete Term
-	 *
-	 * @param  \WP_Term $term WP_Term to delete.
-	 * @return boolean
-	 */
-	public function delete_term( \WP_Term $term ) : bool {
-		$term_document = new Document\Term( $term );
-
-		return $this->client_bridge->delete_document(
-			$term_document->get_document_id()
+			$document->get_document_id()
 		);
 	}
 
@@ -219,10 +261,80 @@ class Indexer {
 	 */
 	public function handle_post_status_change( string $new_status, string $old_status, \WP_Post $post ) {
 		if ( 'publish' === $new_status ) {
-			$this->index_post( $post->ID );
+			$this->index_document( $post );
 		} else {
-			$this->delete_post( $post->ID );
+			$this->delete_document( $post );
 		}
 	}
 
+
+	/**
+	 * Handle Save Post
+	 *
+	 * @param integer $post_id Post ID.
+	 * @return void
+	 */
+	public function handle_save_post( int $post_id ) {
+		$post = get_post( $post_id );
+		$this->index_document( $post );
+	}
+
+	/**
+	 * Handle Delete Post
+	 *
+	 * @param integer $post_id Post ID.
+	 * @return void
+	 */
+	public function handle_delete_post( int $post_id ) {
+		$post = get_post( $post_id );
+		$this->delete_document( $post );
+	}
+
+	/**
+	 * Handle Save Term
+	 *
+	 * @param integer $term_id   Term ID.
+	 * @param integer $tax_id    Taxonomy ID.
+	 * @param string  $tax_slug  Taxonomy slug.
+	 * @return void
+	 */
+	public function handle_save_term( int $term_id, int $tax_id, string $tax_slug ) {
+		$term = get_term( $term_id, $tax_slug );
+		$this->index_document( $term );
+	}
+
+	/**
+	 * Handle Delete Term
+	 *
+	 * @param integer $term_id   Term ID.
+	 * @param string  $tax_slug  Taxonomy slug.
+	 * @return void
+	 */
+	public function handle_delete_term( int $term_id, string $tax_slug ) {
+		$term = get_term( $term_id, $tax_slug );
+		$this->delete_document( $term );
+	}
+
+	/**
+	 * Handle save user
+	 *
+	 * @param integer $user_id User ID.
+	 * @return void
+	 */
+	public function handle_save_user( int $user_id ) {
+		$user = get_user_by( 'id', $user_id );
+		$this->index_document( $user );
+	}
+
+	/**
+	 * Handle delete user.
+	 *
+	 * @param integer  $user_id   User ID.
+	 * @param int|null $reassign  User data should be reassigned to.
+	 * @param \WP_User $user      WP_User object.
+	 * @return void
+	 */
+	public function handle_delete_user( int $user_id, $reassign, \WP_User $user ) {
+		$this->delete_document( $user );
+	}
 }

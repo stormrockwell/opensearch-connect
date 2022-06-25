@@ -25,6 +25,18 @@ class Term extends \OSC\Document {
 			return false;
 		}
 
+		$hide_from_search = 'false';
+		if ( 'category' === $object->taxonomy && 'Uncategorized' === $object->name ) {
+			/**
+			 * Filter for hiding uncategorized from search
+			 *
+			 * @hook osc/document/term/hide_uncategorized_from_search
+			 * @param bool     $value   Whether or not to hide the term from search.
+			 * @param \WP_Term $object  WP_Term object.
+			 */
+			$hide_from_search = apply_filters( 'osc/document/term/hide_uncategorized_from_search', true, $object );
+		}
+
 		// Set field data.
 		$this->fields = wp_parse_args(
 			array(
@@ -40,6 +52,7 @@ class Term extends \OSC\Document {
 				'menu_order'        => 0, // TODO: Add support for taxonomy terms order plugin (term_order).
 				'url'               => get_term_link( $object ),
 				'meta'              => $object->meta,
+				'hide_from_search'  => $hide_from_search,
 			),
 			$this->base_fields
 		);

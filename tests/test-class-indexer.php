@@ -21,13 +21,59 @@ class Indexer_Test extends WP_UnitTestCase {
 	public function setUp() : void {
 		parent::setUp();
 
-		$this->post_id = $this->factory->post->create();
-		$this->term    = $this->factory->term->create_and_get();
+		$this->post = $this->get_post();
+		$this->term = $this->get_term();
+		$this->user = $this->get_user();
 
 		$this->indexer = Indexer::get_instance();
 
 		$this->client_bridge = Client_Bridge::get_instance();
 		$this->client_bridge->create_index();
+	}
+
+	/**
+	 * Get and create post if needed.
+	 *
+	 * @return \WP_Post
+	 */
+	public function get_post() {
+		if ( isset( $this->post ) ) {
+			return $this->post;
+		}
+
+		$this->post = $this->factory->post->create_and_get();
+
+		return $this->post;
+	}
+
+	/**
+	 * Get and create user if needed.
+	 *
+	 * @return \WP_User
+	 */
+	public function get_user() {
+		if ( isset( $this->user ) ) {
+			return $this->user;
+		}
+
+		$this->user = $this->factory->user->create_and_get();
+
+		return $this->user;
+	}
+
+	/**
+	 * Get and create term if needed.
+	 *
+	 * @return \WP_Term
+	 */
+	public function get_term() {
+		if ( isset( $this->term ) ) {
+			return $this->term;
+		}
+
+		$this->term = $this->factory->term->create_and_get();
+
+		return $this->term;
 	}
 
 	/**
@@ -45,100 +91,77 @@ class Indexer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test index post
+	 * Test index document
 	 *
+	 * @dataProvider provide_documents
+	 *
+	 * @param  object $input  Object to be indexed.
 	 * @return void
 	 */
-	public function test_index_post() {
-		$input = $this->post_id;
-
-		$output = $this->indexer->index_post( $input );
+	public function test_index_document( $input ) {
+		$output = $this->indexer->index_document( $input );
 
 		$this->assertTrue( $output );
 	}
 
 	/**
-	 * Test index term
+	 * Test update document
 	 *
+	 * @dataProvider provide_documents
+	 *
+	 * @param  object $input  Object to be updated.
 	 * @return void
 	 */
-	public function test_index_term() {
-		$input = $this->term;
-
-		$output = $this->indexer->index_term( $input );
+	public function test_update_document( $input ) {
+		$this->indexer->index_document( $input );
+		$output = $this->indexer->index_document( $input );
 
 		$this->assertTrue( $output );
 	}
 
 	/**
-	 * Test indexing an existing post.
+	 * Test delete document
 	 *
+	 * @dataProvider provide_documents
+	 *
+	 * @param  object $input  Object to be updated.
 	 * @return void
 	 */
-	public function test_index_existing_post() {
-		$input = $this->post_id;
-
-		$this->indexer->index_post( $input );
-		$output = $this->indexer->index_post( $input );
+	public function test_delete_document( $input ) {
+		$this->indexer->index_document( $input );
+		$output = $this->indexer->index_document( $input );
 
 		$this->assertTrue( $output );
 	}
 
 	/**
-	 * Test delete post.
+	 * Test delete nonexisting document
 	 *
+	 * @dataProvider provide_documents
+	 *
+	 * @param  object $input  Object to be updated.
 	 * @return void
 	 */
-	public function test_delete_post() {
-		$input = $this->post_id;
-
-		// Index post to delete.
-		$this->indexer->index_post( $input );
-		$this->client_bridge->refresh();
-
-		// Delete post.
-		$output = $this->indexer->delete_post( $input );
+	public function test_delete_nonexisting_document( $input ) {
+		$this->indexer->index_document( $input );
+		$output = $this->indexer->index_document( $input );
 
 		$this->assertTrue( $output );
 	}
 
-	/**
-	 * Test delete post.
-	 *
-	 * @return void
-	 */
-	public function test_delete_nonexistant_post() {
-		$input = $this->post_id;
-
-		// Index post to delete.
-		$this->indexer->index_post( $input );
-		$this->client_bridge->refresh();
-
-		// Delete post.
-		$output = $this->indexer->delete_post( $input );
-
-		// Delete post again.
-		$output = $this->indexer->delete_post( $input );
-
-		$this->assertTrue( $output );
-	}
+	// Index update delete.
 
 	/**
-	 * Test delete term.
+	 * Provide Documents data provider
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function test_delete_term() {
-		$input = $this->term;
-
-		// Index post to delete.
-		$this->indexer->index_term( $input );
-		$this->client_bridge->refresh();
-
-		// Delete post.
-		$output = $this->indexer->delete_term( $input );
-
-		$this->assertTrue( $output );
+	public function provide_documents() {
+		return array(
+			'Post Object' => array( 'input' => $this->get_post() ),
+			'Term Object' => array( 'input' => $this->get_term() ),
+			'User Object' => array( 'input' => $this->get_user() ),
+		);
 	}
 
 }
