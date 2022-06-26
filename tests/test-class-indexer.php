@@ -149,6 +149,17 @@ class Indexer_Test extends WP_UnitTestCase {
 		$this->assertTrue( $output );
 	}
 
+	/**
+	 * Test reindex all documents
+	 *
+	 * @return void
+	 */
+	public function test_reindex_all_documents() {
+		$output = $this->indexer->reindex_all_documents();
+
+		$this->assertTrue( $output );
+	}
+
 	// Index update delete.
 
 	/**
@@ -183,5 +194,4 @@ class Indexer_Test extends WP_UnitTestCase {
 			),
 		);
 	}
-
 }

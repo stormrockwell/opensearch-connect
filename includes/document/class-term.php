@@ -25,7 +25,7 @@ class Term extends \OSC\Document {
 			return false;
 		}
 
-		$hide_from_search = 'false';
+		$hide_from_search = false;
 		if ( 'category' === $object->taxonomy && 'Uncategorized' === $object->name ) {
 			/**
 			 * Filter for hiding uncategorized from search

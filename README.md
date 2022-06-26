@@ -2,6 +2,13 @@
 
 Plugin designed to connect your WordPress instance with OpenSearch.
 
+## TODO
+
+1. Zero downtime reindexer using a index manager
+2. Search
+3. Admin interface - Hosts, indexables, 
+4. Maybe using an action scheduler if large syncs hurt the site.
+
 ## Prerequisites
 
 1. Docker
