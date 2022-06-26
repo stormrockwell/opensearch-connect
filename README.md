@@ -1,4 +1,6 @@
-# OpenSearch
+# THIS IS A WORK IN PROGRESS. NOT COMPLETED
+
+# OpenSearch Connect
 
 Plugin designed to connect your WordPress instance with OpenSearch.
 
