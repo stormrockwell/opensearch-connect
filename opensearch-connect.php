@@ -35,7 +35,7 @@ spl_autoload_register(
 			$file = strtolower( $file );
 			$file = str_replace( '_', '-', $file );
 
-			require_once OSC_CONNECT_PLUGIN_PATH . 'includes/' . $file;
+			require_once OSC_CONNECT_PLUGIN_PATH . 'includes' . DIRECTORY_SEPARATOR . $file;
 		}
 	}
 );

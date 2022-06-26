@@ -25,14 +25,15 @@ class Term extends \OSC\Document {
 			return false;
 		}
 
-		$hide_from_search = 'false';
+		$hide_from_search = false;
 		if ( 'category' === $object->taxonomy && 'Uncategorized' === $object->name ) {
 			/**
 			 * Filter for hiding uncategorized from search
 			 *
 			 * @hook osc/document/term/hide_uncategorized_from_search
-			 * @param bool     $value   Whether or not to hide the term from search.
-			 * @param \WP_Term $object  WP_Term object.
+			 * @param  bool     $value   Whether or not to hide the term from search.
+			 * @param  \WP_Term $object  WP_Term object.
+			 * @return bool
 			 */
 			$hide_from_search = apply_filters( 'osc/document/term/hide_uncategorized_from_search', true, $object );
 		}
@@ -71,18 +72,5 @@ class Term extends \OSC\Document {
 		}
 
 		return 'term-' . $this->fields['document_location']['id'];
-	}
-
-	/**
-	 * Format content
-	 *
-	 * @param  string $content  Content to format.
-	 * @return string
-	 */
-	protected function format_content( string $content ) : string {
-		$content = do_shortcode( apply_filters( 'the_content', $content ) ); // phpcs:ignore
-		$content = wp_strip_all_tags( $content );
-
-		return $content;
 	}
 }

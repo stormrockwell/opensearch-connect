@@ -201,15 +201,17 @@ class Indexer {
 				}
 				break;
 			default:
-				// TODO: Add custom document by default.
+				$document = new Document\Custom( $object );
+				break;
 		}
 
 		/**
 		 * Filter get document by object.
 		 *
 		 * @hook osc/indexer/get_document_by_object
-		 * @param object $document Document class.
-		 * @param object $object   Object passed to retrieve the document class.
+		 * @param object $document       Document class.
+		 * @param object $object         Object passed to retrieve the document class.
+		 * @return object|null $document Document class or null to not index.
 		 */
 		return apply_filters( 'osc/indexer/get_document_by_object', $document, $object );
 	}
@@ -249,6 +251,63 @@ class Indexer {
 		return $this->client_bridge->delete_document(
 			$document->get_document_id()
 		);
+	}
+
+	/**
+	 * Reindex all documents
+	 *
+	 * Create a new index, index all documents there, then delete the current index and clone the new one.
+	 *
+	 * @return boolean
+	 */
+	public function reindex_all_documents() : bool {
+		// Create temporary index.
+		$index_name = "osc_clone-{$this->client_bridge->index_name}";
+		$this->client_bridge->create_index( $index_name );
+
+		// Get all posts, pages, users.
+		// TODO: Get custom objects.
+		$terms = get_terms();
+		$users = get_users();
+		$posts = get_posts(
+			array(
+				'posts_per_page' => -1,
+				'post_type'      => 'all',
+			)
+		);
+
+		$objects   = array_merge( $posts, $terms, $users );
+		$documents = array();
+		foreach ( $objects as $object ) {
+			$document = $this->get_document_by_object( $object );
+
+			if ( null !== $document ) {
+				$documents[] = $document;
+			}
+		}
+
+		$response = $this->client_bridge->bulk_index_documents( $documents, $index_name );
+
+		// Quit early if we can't bulk index.
+		if ( false === $response ) {
+			return false;
+		}
+
+		/**
+		 * TODO: Introduce a 0 downtime solution
+		 *
+		 * 1. After creating the tmp index, set all queries to read from it.
+		 * 2. Since it's read-only we will need an index manager to store documents that need to be indexed.
+		 * 3. After clone completion, read from the cloned index, and then run the documents that were waiting to be indexed.
+		 */
+
+		// Clone the new index to the pre-existing index.
+		$this->client_bridge->set_index_readonly( $index_name );
+		$this->client_bridge->delete_index();
+		$this->client_bridge->clone_index( $index_name, $this->client_bridge->index_name );
+		$this->client_bridge->delete_index( $index_name );
+
+		return true;
 	}
 
 	/**

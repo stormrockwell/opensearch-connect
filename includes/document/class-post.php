@@ -76,17 +76,4 @@ class Post extends \OSC\Document {
 
 		return 'post-' . $this->fields['document_location']['id'];
 	}
-
-	/**
-	 * Format content
-	 *
-	 * @param  string $content  Content to format.
-	 * @return string
-	 */
-	protected function format_content( string $content ) : string {
-		$content = do_shortcode( apply_filters( 'the_content', $content ) ); // phpcs:ignore
-		$content = wp_strip_all_tags( $content );
-
-		return $content;
-	}
 }

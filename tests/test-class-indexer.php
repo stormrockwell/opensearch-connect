@@ -47,21 +47,6 @@ class Indexer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get and create user if needed.
-	 *
-	 * @return \WP_User
-	 */
-	public function get_user() {
-		if ( isset( $this->user ) ) {
-			return $this->user;
-		}
-
-		$this->user = $this->factory->user->create_and_get();
-
-		return $this->user;
-	}
-
-	/**
 	 * Get and create term if needed.
 	 *
 	 * @return \WP_Term
@@ -74,6 +59,21 @@ class Indexer_Test extends WP_UnitTestCase {
 		$this->term = $this->factory->term->create_and_get();
 
 		return $this->term;
+	}
+
+	/**
+	 * Get and create user if needed.
+	 *
+	 * @return \WP_User
+	 */
+	public function get_user() {
+		if ( isset( $this->user ) ) {
+			return $this->user;
+		}
+
+		$this->user = $this->factory->user->create_and_get();
+
+		return $this->user;
 	}
 
 	/**
@@ -149,6 +149,17 @@ class Indexer_Test extends WP_UnitTestCase {
 		$this->assertTrue( $output );
 	}
 
+	/**
+	 * Test reindex all documents
+	 *
+	 * @return void
+	 */
+	public function test_reindex_all_documents() {
+		$output = $this->indexer->reindex_all_documents();
+
+		$this->assertTrue( $output );
+	}
+
 	// Index update delete.
 
 	/**
@@ -158,10 +169,29 @@ class Indexer_Test extends WP_UnitTestCase {
 	 */
 	public function provide_documents() {
 		return array(
-			'Post Object' => array( 'input' => $this->get_post() ),
-			'Term Object' => array( 'input' => $this->get_term() ),
-			'User Object' => array( 'input' => $this->get_user() ),
+			'Post Object'   => array( 'input' => $this->get_post() ),
+			'Term Object'   => array( 'input' => $this->get_term() ),
+			'User Object'   => array( 'input' => $this->get_user() ),
+			'Custom Object' => array(
+				'input' => (object) array(
+					'document_location' => array(
+						'id'     => 1,
+						'object' => 'custom',
+						'type'   => 'custom-type',
+					),
+					'menu_order'        => 0,
+					'media_id'          => 0,
+					'title'             => 'Custom Item',
+					'slug'              => 'custom-item',
+					'content'           => 'Lorem Ipsum',
+					'excerpt'           => '',
+					'keywords'          => 'custom, item',
+					'url'               => 'https://www.example.com',
+					'tax'               => array(),
+					'meta'              => array(),
+					'hide_from_search'  => false,
+				),
+			),
 		);
 	}
-
 }

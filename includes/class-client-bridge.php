@@ -32,10 +32,8 @@ class Client_Bridge {
 
 	/**
 	 * Constructor
-	 *
-	 * @param string $index_name  Name of index. Will override field for index name.
 	 */
-	protected function __construct( string $index_name = '' ) {
+	protected function __construct() {
 		// TODO: create fields for hosts, index name, and credentials.
 		// TODO: handle multisite.
 		/**
@@ -109,17 +107,21 @@ class Client_Bridge {
 	/**
 	 * Create OpenSearch index.
 	 *
-	 * @param array $body        Body usually containing additional settings/mappings.
+	 * @param  string $index_name  Name of index.
 	 * @return array
 	 */
-	public function create_index( array $body = array() ) : array {
+	public function create_index( string $index_name = '' ) : array {
+		$index_name = empty( $index_name ) ? $this->index_name : $index_name;
 
-		/* Delete index if it exists */
-		$this->delete_index( $this->index_name );
+		// Get settings and mappings.
+		$body = require OSC_CONNECT_PLUGIN_PATH . 'includes' . DIRECTORY_SEPARATOR . 'settings-mappings.php';
+
+		// Delete index if it exists.
+		$this->delete_index( $index_name );
 
 		return $this->os_client->indices()->create(
 			array(
-				'index' => $this->index_name,
+				'index' => $index_name,
 				'body'  => $body,
 			)
 		);
@@ -128,13 +130,51 @@ class Client_Bridge {
 	/**
 	 * Delete index if exists
 	 *
+	 * @param string $index_name  Name of index.
 	 * @return array
 	 */
-	public function delete_index() : array {
+	public function delete_index( $index_name = '' ) : array {
+		$index_name = empty( $index_name ) ? $this->index_name : $index_name;
+
 		return $this->os_client->indices()->delete(
 			array(
-				'index'              => $this->index_name,
+				'index'              => $index_name,
 				'ignore_unavailable' => true,
+			)
+		);
+	}
+
+	/**
+	 * Clone Index
+	 *
+	 * @param string $index_name  Current index name.
+	 * @param string $target      Target index name.
+	 * @return array
+	 */
+	public function clone_index( string $index_name, string $target ) {
+		return $this->os_client->indices()->clone(
+			array(
+				'index'  => $index_name,
+				'target' => $target,
+			)
+		);
+	}
+
+	/**
+	 * Set index to readonly
+	 *
+	 * @param string $index_name  Name of index.
+	 * @return array
+	 */
+	public function set_index_readonly( string $index_name ) {
+		return $this->os_client->indices()->putSettings(
+			array(
+				'index' => $index_name,
+				'body'  => array(
+					'settings' => array(
+						'index.blocks.write' => true,
+					),
+				),
 			)
 		);
 	}
@@ -142,8 +182,8 @@ class Client_Bridge {
 	/**
 	 * Index OpenSearch document
 	 *
-	 * @param string $id      Unique identifier for document.
-	 * @param array  $document OpenSearch document.
+	 * @param  string $id       Unique identifier for document.
+	 * @param  array  $document OpenSearch document body.
 	 * @return boolean
 	 */
 	public function index_document( string $id, array $document ) : bool {
@@ -172,6 +212,42 @@ class Client_Bridge {
 
 			return 'created' === $response['result'];
 		}
+	}
+
+	/**
+	 * Index OpenSearch documents
+	 *
+	 * Note: this does not handle updating documents that exist.
+	 *
+	 * @param array  $documents   OpenSearch document.
+	 * @param string $index_name  Name of index.
+	 * @return boolean
+	 */
+	public function bulk_index_documents( array $documents, string $index_name = '' ) : bool {
+		$index_name = empty( $index_name ) ? $this->index_name : $index_name;
+
+		// Create body for bulk indexing.
+		$body = array();
+		foreach ( $documents as $document ) {
+			if ( is_subclass_of( $document, 'OSC\Document' ) ) {
+				$body[] = array(
+					'index' => array(
+						'_index' => $index_name,
+						'_id'    => $document->get_document_id(),
+					),
+				);
+
+				$body[] = $document->get_field_data();
+			}
+		}
+
+		$response = $this->os_client->bulk(
+			array(
+				'body' => $body,
+			)
+		);
+
+		return false === $response['errors'];
 	}
 
 	/**
