@@ -160,6 +160,12 @@ class Client_Bridge {
 		);
 	}
 
+	/**
+	 * Set index to readonly
+	 *
+	 * @param string $index_name  Name of index.
+	 * @return array
+	 */
 	public function set_index_readonly( string $index_name ) {
 		return $this->os_client->indices()->putSettings(
 			array(
